@@ -344,19 +344,20 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,visualstudiocode,python,jupyternotebooks
 
 # mmdetection
-./mmdetection/work_dirs/*
-./mmdetection/work_dirs
-./mmdetection/data/*
-./mmdetection/data
-./mmdetection/*.pkl
-./mmdetection/*.pkl.json
-./mmdetection/*.log.json
-./mmdetection/docs/modelzoo_statistics.md
-./mmdetection/mmdet/.mim
-./mmdetection/.vscode/*
-./mmdetection/.vscode
+mmdetection/work_dirs/*
+mmdetection/work_dirs
+mmdetection/data/*
+mmdetection/data
+mmdetection/*.pkl
+mmdetection/*.pkl.json
+mmdetection/*.log.json
+mmdetection/docs/modelzoo_statistics.md
+mmdetection/mmdet/.mim
+mmdetection/.vscode/*
+mmdetection/.vscode
 *.jpg
 *.jpeg
 *.png
 *.pth
 *.log
+*.mp4
