@@ -356,3 +356,5 @@ $RECYCLE.BIN/
 *.jpg
 *.jpeg
 *.png
+*.pth
+*.log
