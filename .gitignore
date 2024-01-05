@@ -346,8 +346,6 @@ $RECYCLE.BIN/
 # mmdetection
 mmdetection/work_dirs/*
 mmdetection/work_dirs
-mmdetection/data/*
-mmdetection/data
 mmdetection/*.pkl
 mmdetection/*.pkl.json
 mmdetection/*.log.json
@@ -355,6 +353,8 @@ mmdetection/docs/modelzoo_statistics.md
 mmdetection/mmdet/.mim
 mmdetection/.vscode/*
 mmdetection/.vscode
+data/*
+data
 *.jpg
 *.jpeg
 *.png
