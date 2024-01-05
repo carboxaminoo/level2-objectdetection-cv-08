@@ -118,9 +118,10 @@ def main():
     if args.wandb:
         wandb.init(
             project="competition_1",
-            config=cfg,
-            runner=runner
+            config=cfg
         )
+        wandb.run.name = f'JH_{runner.timestamp}'
+        wandb.run.save()
     # start training
     runner.train()
 
