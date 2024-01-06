@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
-from typing import Optional, Sequence
+from typing import Sequence
 
 from mmengine.hooks import Hook
 from mmengine.runner import Runner
@@ -26,7 +26,7 @@ class SubmissionHook(Hook):
         test_out_dir (str) : 저장할 경로
     """
 
-    def __init__(self, test_out_dir: Optional[str] = None):
+    def __init__(self, test_out_dir='submit'):
         self.prediction_strings = []
         self.file_names = []
         self.test_out_dir = test_out_dir
