@@ -52,6 +52,7 @@ def parse_args():
     # of `--local_rank`.
     parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
     parser.add_argument('--wandb', type=bool, default=True, help='wandb control flag (default: True)')
+    parser.add_argument('--initial', type=str, default='MZ', help='write on your name initial to using wandb run name. (default: MZ)')
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -123,7 +124,7 @@ def main():
         )
         # set wnadb run name
         # 형식 : '{본인 이름 이니셜}_{고유 번호}'
-        wandb.run.name = f'JH_{runner.timestamp}'
+        wandb.run.name = f'{args.initial}_{runner.timestamp}'
         wandb.run.save()
     # start training
     runner.train()
