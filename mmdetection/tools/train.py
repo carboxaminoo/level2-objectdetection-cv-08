@@ -115,11 +115,14 @@ def main():
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
+    # wandb initialization
     if args.wandb:
         wandb.init(
             project="competition_1",
             config=cfg
         )
+        # set wnadb run name
+        # 형식 : '{본인 이름 이니셜}_{고유 번호}'
         wandb.run.name = f'JH_{runner.timestamp}'
         wandb.run.save()
     # start training
