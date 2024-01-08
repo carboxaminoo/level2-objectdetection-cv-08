@@ -1,18 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
-import warnings
-from typing import Optional, Sequence
+from typing import Sequence
 
-import mmcv
-from mmengine.fileio import get
 from mmengine.hooks import Hook
 from mmengine.runner import Runner
 from mmengine.utils import mkdir_or_exist
-from mmengine.visualization import Visualizer
 
-from mmdet.datasets.samplers import TrackImgSampler
 from mmdet.registry import HOOKS
-from mmdet.structures import DetDataSample, TrackDataSample
+from mmdet.structures import DetDataSample
 import pandas as pd
 
 @HOOKS.register_module()
@@ -31,7 +26,7 @@ class SubmissionHook(Hook):
         test_out_dir (str) : 저장할 경로
     """
 
-    def __init__(self, test_out_dir: Optional[str] = None):
+    def __init__(self, test_out_dir='submit'):
         self.prediction_strings = []
         self.file_names = []
         self.test_out_dir = test_out_dir
@@ -49,17 +44,13 @@ class SubmissionHook(Hook):
         """
         assert len(outputs) == 1, \
             'only batch_size=1 is supported while testing.'
-        
-        pred_x_size = data_batch['inputs'][0].shape[1]
-        pred_y_size = data_batch['inputs'][0].shape[2]
 
         for output in outputs:
             prediction_string = ''
             for label, score, bbox in zip(output.pred_instances.labels, output.pred_instances.scores, output.pred_instances.bboxes):
                 bbox = bbox.cpu().numpy()
-                bbox[0], bbox[2] = bbox[0] / pred_x_size * 1024, bbox[2] / pred_x_size * 1024
-                bbox[1], bbox[3] = bbox[1] / pred_y_size * 1024, bbox[3] / pred_y_size * 1024
-                prediction_string += str(int(label.cpu())) + ' ' + str(float(score.cpu())) + ' ' + str(bbox[0]) + ' ' + str(bbox[1]) + ' ' + str(bbox[2]) + ' ' + str(bbox[3])
+                # 이미 xyxy로 되어있음
+                prediction_string += str(int(label.cpu())) + ' ' + str(float(score.cpu())) + ' ' + str(bbox[0]) + ' ' + str(bbox[1]) + ' ' + str(bbox[2]) + ' ' + str(bbox[3]) + ' '
             self.prediction_strings.append(prediction_string)
             self.file_names.append(output.img_path[13:])
 
