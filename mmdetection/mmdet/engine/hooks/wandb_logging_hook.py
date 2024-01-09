@@ -83,7 +83,9 @@ class WandbLoggingHook(Hook):
         for i in range(len(pre_outs)):
             annotations.append({
                 'bboxes': pre_outs[i].gt_instances.bboxes.cpu().numpy(),
-                'labels': pre_outs[i].gt_instances.labels.cpu().numpy()
+                'labels': pre_outs[i].gt_instances.labels.cpu().numpy(),
+                'bboxes_ignore': pre_outs[i].ignored_instances.bboxes.cpu().numpy(),
+                'labels_ignore': pre_outs[i].ignored_instances.labels.cpu().numpy()
             })
             pred_bboxes = pre_outs[i].pred_instances.bboxes.cpu().detach().numpy()
             pred_scores = pre_outs[i].pred_instances.scores.cpu().detach().numpy()
