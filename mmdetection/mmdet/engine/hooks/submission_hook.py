@@ -10,6 +10,8 @@ from mmdet.registry import HOOKS
 from mmdet.structures import DetDataSample
 import pandas as pd
 
+
+
 @HOOKS.register_module()
 class SubmissionHook(Hook):
     """
@@ -31,9 +33,11 @@ class SubmissionHook(Hook):
         self.file_names = []
         self.test_out_dir = test_out_dir
 
+
     def after_test_iter(self, runner: Runner, batch_idx: int, data_batch: dict,
                         outputs: Sequence[DetDataSample]) -> None:
-        """Run after every testing iterations.
+        """
+        Run after every testing iterations.
 
         Args:
             runner (:obj:`Runner`): The runner of the testing process.
@@ -52,7 +56,8 @@ class SubmissionHook(Hook):
                 # 이미 xyxy로 되어있음
                 prediction_string += str(int(label.cpu())) + ' ' + str(float(score.cpu())) + ' ' + str(bbox[0]) + ' ' + str(bbox[1]) + ' ' + str(bbox[2]) + ' ' + str(bbox[3]) + ' '
             self.prediction_strings.append(prediction_string)
-            self.file_names.append(output.img_path[13:])
+            self.file_names.append(output.img_path[-13:])
+
 
     def after_test(self, runner: Runner):
         """
