@@ -1,4 +1,4 @@
-# exclude input data 
+# exclude input data
 dataset/
 
 # exclude baseline
@@ -7,7 +7,7 @@ baseline/
 # exclude custom config files (only include base.yml)
 !config/
 config/*
-!config/base.yml 
+!config/base.yml
 !config/final.yml
 
 # exclude custom dataset files (only include dataset.py)
@@ -353,6 +353,7 @@ mmdetection/docs/modelzoo_statistics.md
 mmdetection/mmdet/.mim
 mmdetection/.vscode/*
 mmdetection/.vscode
+work_dirs
 data/*
 data
 *.jpg
