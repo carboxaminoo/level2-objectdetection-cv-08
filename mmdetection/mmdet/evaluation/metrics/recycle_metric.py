@@ -96,8 +96,11 @@ class RecycleMetric:
             gt_area = abs((gt_bbox[2] - gt_bbox[0]) * (gt_bbox[3] - gt_bbox[1]))
             for idx in range(self.bbox_size_class_num + 1):
                 if (
-                    gt_area > self.bbox_size_boundary[idx]
-                    and gt_area <= self.bbox_size_boundary[idx + 1]
+                    gt_area
+                    > self.bbox_size_boundary[idx] * self.bbox_size_boundary[idx]
+                    and gt_area
+                    <= self.bbox_size_boundary[idx + 1]
+                    * self.bbox_size_boundary[idx + 1]
                 ):
                     size_gt_batch_bboxs[idx].append(gt_bbox)
                     size_gt_batch_labels[idx].append(gt_label)

@@ -7,8 +7,10 @@ from mmdet.registry import HOOKS
 from mmdet.structures import DetDataSample
 from mmdet.evaluation.metrics.recycle_metric import RecycleMetric
 from torchmetrics.detection import MeanAveragePrecision
-from tqdm import tqdm
+
+import torch
 import wandb
+from tqdm import tqdm
 
 
 @HOOKS.register_module()
@@ -115,7 +117,8 @@ class MetricHook(Hook):
         #     class_aps.append(sum(class_ap) / len(class_ap))
         # for bbox_class_ap in self.metric_class.ap50_bbox_class_list:
         #     class_bbox_aps.append(sum(bbox_class_ap) / len(bbox_class_ap))
-        base_metric = MeanAveragePrecision(
+        base_metric = MeanAveragePrecision(iou_type="bbox", class_metrics=True)
+        base_metric50 = MeanAveragePrecision(
             iou_type="bbox", class_metrics=True, iou_thresholds=[0.5]
         )
         bbox_size_metrics = [
@@ -133,6 +136,7 @@ class MetricHook(Hook):
 
         for gt_dict, pred_dict in tqdm(self.metric_class.predict_base_list):
             base_metric.update([pred_dict], [gt_dict])
+            base_metric50.update([pred_dict], [gt_dict])
         for idx, bbox_size_dict in enumerate(
             tqdm(self.metric_class.predict_bbox_size_dict)
         ):
@@ -179,10 +183,7 @@ class MetricHook(Hook):
                 bbox_count_metrics[3].compute(),
             }
         )
-
-        val_map = "val_map"
-        val_map50 = "val_map50"
-        val_map70 = "val_map70"
+        score_dict = {}
         labels = [
             "General trash",
             "Paper",
@@ -195,21 +196,92 @@ class MetricHook(Hook):
             "Battery",
             "Clothing",
         ]
-        class_map = [f"val_class_{label}" for label in labels]
-        bbox_count_map_name = [
-            f"val_bbox_count_{self.count_boundary[1]}",
-            f"val_bbox_count_{self.count_boundary[1]}_{self.count_boundary[2]}",
-            f"val_bbox_count_{self.count_boundary[2]}_{self.count_boundary[3]}",
-            f"val_bbox_count_{self.count_boundary[3]}",
-        ]
+        base_score_names = ["mAP", "mAP50", "mAP75", "mAR_1", "mAR_10", "mAR_100"]
+        base_socre_indexs = ["map", "map_50", "map_75", "mar_1", "mar_10", "mar_100"]
+
+        base_metric_score = base_metric.compute()
+        base_metric50_score = base_metric50.compute()
+        bbox_size_metric_scores = [x.compute() for x in bbox_size_metrics]
+        bbox_count_metric_scores = [x.compute() for x in bbox_count_metrics]
+
+        for score_name, score_index in zip(base_score_names, base_socre_indexs):
+            score_dict[f"val_{score_name}"] = base_metric_score[score_index]
+        for index, label in enumerate(labels):
+            score_dict[f"val_{label}_mAP50"] = base_metric50_score["map_per_class"][
+                index
+            ]
+            score_dict[f"val_{label}_mAR100"] = base_metric_score["mar_100_per_class"][
+                index
+            ]
+
         bbox_size_map_name = [
-            f"val_bbox_size_{self.size_boundary[1]}",
+            f"val_bbox_size_{self.size_boundary[0]}",
+            f"val_bbox_size_{self.size_boundary[0]}_{self.size_boundary[1]}",
             f"val_bbox_size_{self.size_boundary[1]}_{self.size_boundary[2]}",
             f"val_bbox_size_{self.size_boundary[2]}_{self.size_boundary[3]}",
             f"val_bbox_size_{self.size_boundary[3]}",
         ]
-        class_per_map = {key: value for key, value in zip(class_map, base_metric[12])}
-        wandb.log(class_per_map)
+        bbox_count_map_name = [
+            f"val_bbox_count_{self.count_boundary[0]}",
+            f"val_bbox_count_{self.count_boundary[0]}_{self.count_boundary[1]}",
+            f"val_bbox_count_{self.count_boundary[1]}_{self.count_boundary[2]}",
+            f"val_bbox_count_{self.count_boundary[2]}_{self.count_boundary[3]}",
+            f"val_bbox_count_{self.count_boundary[3]}",
+        ]
+        for index, name in enumerate(bbox_size_map_name):
+            score_dict[name + "_mAP50"] = bbox_size_metric_scores[index]["map_50"]
+            score_dict[name + "_mAR100"] = bbox_size_metric_scores[index]["mar_100"]
+        for index, name in enumerate(bbox_count_map_name):
+            score_dict[name + "_mAP50"] = bbox_count_metric_scores[index]["map_50"]
+            score_dict[name + "_mAR100"] = bbox_count_metric_scores[index]["mar_100"]
+
+        for metric_index, name in enumerate(bbox_size_map_name):
+            for label_index, label in enumerate(labels):
+                if label_index in bbox_size_metric_scores[metric_index]["classes"]:
+                    score_dict[name + f"_{label}_mAP50"] = bbox_size_metric_scores[
+                        metric_index
+                    ]["map_per_class"][
+                        torch.nonzero(
+                            bbox_size_metric_scores[metric_index]["classes"]
+                            == label_index
+                        ).squeeze()
+                    ]
+                    score_dict[name + f"_{label}_mAR100"] = bbox_size_metric_scores[
+                        metric_index
+                    ]["mar_100_per_class"][
+                        torch.nonzero(
+                            bbox_size_metric_scores[metric_index]["classes"]
+                            == label_index
+                        ).squeeze()
+                    ]
+                else:
+                    score_dict[name + f"_{label}_mAP50"] = -1
+                    score_dict[name + f"_{label}_mAR100"] = -1
+        for metric_index, name in enumerate(bbox_count_map_name):
+            for label_index, label in enumerate(labels):
+                if label_index in bbox_count_metric_scores[metric_index]["classes"]:
+                    score_dict[name + f"_{label}_mAP50"] = bbox_count_metric_scores[
+                        metric_index
+                    ]["map_per_class"][
+                        torch.nonzero(
+                            bbox_count_metric_scores[metric_index]["classes"]
+                            == label_index
+                        ).squeeze()
+                    ]
+                    score_dict[name + f"_{label}_mAR100"] = bbox_count_metric_scores[
+                        metric_index
+                    ]["mar_100_per_class"][
+                        torch.nonzero(
+                            bbox_count_metric_scores[metric_index]["classes"]
+                            == label_index
+                        ).squeeze()
+                    ]
+                else:
+                    score_dict[name + f"_{label}_mAP50"] = -1
+                    score_dict[name + f"_{label}_mAR100"] = -1
+
+        wandb.log(score_dict)
+
         # wandb.log(
         #     {
         #         "bbox_mAP": base_metric.compute()["map_50"],
