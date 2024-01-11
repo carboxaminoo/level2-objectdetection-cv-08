@@ -180,6 +180,36 @@ class MetricHook(Hook):
             }
         )
 
+        val_map = "val_map"
+        val_map50 = "val_map50"
+        val_map70 = "val_map70"
+        labels = [
+            "General trash",
+            "Paper",
+            "Paper pack",
+            "Metal",
+            "Glass",
+            "Plastic",
+            "Styrofoam",
+            "Plastic bag",
+            "Battery",
+            "Clothing",
+        ]
+        class_map = [f"val_class_{label}" for label in labels]
+        bbox_count_map_name = [
+            f"val_bbox_count_{self.count_boundary[1]}",
+            f"val_bbox_count_{self.count_boundary[1]}_{self.count_boundary[2]}",
+            f"val_bbox_count_{self.count_boundary[2]}_{self.count_boundary[3]}",
+            f"val_bbox_count_{self.count_boundary[3]}",
+        ]
+        bbox_size_map_name = [
+            f"val_bbox_size_{self.size_boundary[1]}",
+            f"val_bbox_size_{self.size_boundary[1]}_{self.size_boundary[2]}",
+            f"val_bbox_size_{self.size_boundary[2]}_{self.size_boundary[3]}",
+            f"val_bbox_size_{self.size_boundary[3]}",
+        ]
+        class_per_map = {key: value for key, value in zip(class_map, base_metric[12])}
+        wandb.log(class_per_map)
         # wandb.log(
         #     {
         #         "bbox_mAP": base_metric.compute()["map_50"],
