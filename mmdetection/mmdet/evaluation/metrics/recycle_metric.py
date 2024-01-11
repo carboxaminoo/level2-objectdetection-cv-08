@@ -14,10 +14,10 @@ class RecycleMetric:
 
         # min, boundary ~~~ , max
         self.bbox_size_boundary = [0, 64, 128, 256, 512, 1048577]
-        self.bbox_size_class_num = len(self.bbox_size_boundary) - 2
+        self.bbox_size_class_num = len(self.bbox_size_boundary) - 1
 
         self.bbox_count_boundary = [0, 10, 20, 30, 50, 99]
-        self.bbox_count_class_num = len(self.bbox_count_boundary) - 2
+        self.bbox_count_class_num = len(self.bbox_count_boundary) - 1
 
         self.gt_dict = []
         self.predict_base_list = []

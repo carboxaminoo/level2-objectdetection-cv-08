@@ -116,17 +116,17 @@ class MetricHook(Hook):
         # for bbox_class_ap in self.metric_class.ap50_bbox_class_list:
         #     class_bbox_aps.append(sum(bbox_class_ap) / len(bbox_class_ap))
         base_metric = MeanAveragePrecision(
-            iou_type="bbox", class_metrics=True, iou_thresholds=[0.25, 0.5, 0.75]
+            iou_type="bbox", class_metrics=True, iou_thresholds=[0.5]
         )
         bbox_size_metrics = [
             MeanAveragePrecision(
-                iou_type="bbox", class_metrics=True, iou_thresholds=[0.25, 0.5, 0.75]
+                iou_type="bbox", class_metrics=True, iou_thresholds=[0.5]
             )
             for _ in range(self.metric_class.bbox_size_class_num)
         ]
         bbox_count_metrics = [
             MeanAveragePrecision(
-                iou_type="bbox", class_metrics=True, iou_thresholds=[0.25, 0.5, 0.75]
+                iou_type="bbox", class_metrics=True, iou_thresholds=[0.5]
             )
             for _ in range(self.metric_class.bbox_count_class_num)
         ]
