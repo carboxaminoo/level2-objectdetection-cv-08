@@ -48,9 +48,9 @@ class RecycleMetric:
         gt_batch_bboxs = outputs[0].gt_instances["bboxes"]
         gt_batch_labels = outputs[0].gt_instances["labels"]
 
-        pred_batch_bboxs = outputs[0]._pred_instances["bboxes"]
-        pred_batch_labels = outputs[0]._pred_instances["labels"]
-        pred_batch_scores = outputs[0]._pred_instances["scores"]
+        pred_batch_bboxs = outputs[0].pred_instances["bboxes"]
+        pred_batch_labels = outputs[0].pred_instances["labels"]
+        pred_batch_scores = outputs[0].pred_instances["scores"]
 
         # self.gt_dict['boxes'].append(gt_batch_bboxs)
         # self.gt_dict['labels'].append(torch.tensor(gt_batch_labels).to(gt_batch_bboxs.device))
@@ -88,9 +88,9 @@ class RecycleMetric:
         gt_batch_bboxs = outputs[0].gt_instances["bboxes"]
         gt_batch_labels = outputs[0].gt_instances["labels"]
 
-        pred_batch_bboxs = outputs[0]._pred_instances["bboxes"]
-        pred_batch_labels = outputs[0]._pred_instances["labels"]
-        pred_batch_scores = outputs[0]._pred_instances["scores"]
+        pred_batch_bboxs = outputs[0].pred_instances["bboxes"]
+        pred_batch_labels = outputs[0].pred_instances["labels"]
+        pred_batch_scores = outputs[0].pred_instances["scores"]
 
         for gt_bbox, gt_label in zip(gt_batch_bboxs, gt_batch_labels):
             gt_area = abs((gt_bbox[2] - gt_bbox[0]) * (gt_bbox[3] - gt_bbox[1]))
@@ -139,9 +139,9 @@ class RecycleMetric:
         gt_batch_bboxs = outputs[0].gt_instances["bboxes"]
         gt_batch_labels = outputs[0].gt_instances["labels"]
 
-        pred_batch_bboxs = outputs[0]._pred_instances["bboxes"]
-        pred_batch_labels = outputs[0]._pred_instances["labels"]
-        pred_batch_scores = outputs[0]._pred_instances["scores"]
+        pred_batch_bboxs = outputs[0].pred_instances["bboxes"]
+        pred_batch_labels = outputs[0].pred_instances["labels"]
+        pred_batch_scores = outputs[0].pred_instances["scores"]
 
         image_bbox_count = len(outputs[0].gt_instances["labels"])
 
