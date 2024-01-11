@@ -11,6 +11,7 @@ from .visualization_hook import DetVisualizationHook, TrackVisualizationHook
 from .yolox_mode_switch_hook import YOLOXModeSwitchHook
 from .submission_hook import SubmissionHook
 from .metric_hook import MetricHook
+from .wandb_logging_hook import WandbLoggingHook
 
 __all__ = [
     "YOLOXModeSwitchHook",

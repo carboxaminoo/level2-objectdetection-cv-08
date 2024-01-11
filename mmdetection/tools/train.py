@@ -2,6 +2,7 @@
 import argparse
 import os
 import os.path as osp
+import wandb
 
 from mmengine.config import Config, DictAction
 from mmengine.registry import RUNNERS
@@ -50,6 +51,8 @@ def parse_args():
     # will pass the `--local-rank` parameter to `tools/train.py` instead
     # of `--local_rank`.
     parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
+    parser.add_argument('--wandb', type=bool, default=True, help='wandb control flag (default: True)')
+    parser.add_argument('--initial', type=str, default='MZ', help='write on your name initial to using wandb run name. (default: MZ)')
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -113,6 +116,16 @@ def main():
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
+    # wandb initialization
+    if args.wandb:
+        wandb.init(
+            project="competition_1",
+            config=cfg
+        )
+        # set wnadb run name
+        # 형식 : '{본인 이름 이니셜}_{고유 번호}'
+        wandb.run.name = f'{args.initial}_{runner.timestamp}'
+        wandb.run.save()
     # start training
     runner.train()
 

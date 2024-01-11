@@ -9,6 +9,8 @@ from terminaltables import AsciiTable
 from .bbox_overlaps import bbox_overlaps
 from .class_names import get_classes
 
+from mmdet.registry import METRICS
+
 
 def average_precision(recalls, precisions, mode='area'):
     """Calculate average precision (for single or multiple scales).
@@ -521,7 +523,7 @@ def get_cls_group_ofs(annotations, class_id):
 
     return gt_group_ofs
 
-
+@METRICS.register_module()
 def eval_map(det_results,
              annotations,
              scale_ranges=None,
@@ -717,8 +719,8 @@ def eval_map(det_results,
                 aps.append(cls_result['ap'])
         mean_ap = np.array(aps).mean().item() if aps else 0.0
 
-    print_map_summary(
-        mean_ap, eval_results, dataset, area_ranges, logger=logger)
+    # print_map_summary(
+    #     mean_ap, eval_results, dataset, area_ranges, logger=logger)
 
     return mean_ap, eval_results
 
