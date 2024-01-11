@@ -15,6 +15,8 @@ import wandb
 class MetricHook(Hook):
     def __init__(self) -> None:
         self.metric_class = RecycleMetric()
+        self.count_boundary = self.metric_class.bbox_count_boundary[1:-1]
+        self.size_boundary = self.metric_class.bbox_size_boundary[1:-1]
 
     def after_train_iter(
         self,
@@ -152,7 +154,7 @@ class MetricHook(Hook):
         box_count_3_map = bbox_count_metrics[3].compute()["map_50"]
 
         print(base_metric.compute())
-        print("Class AP : ", base_metric)
+        print("Class AP : ", base_metric)  # check 필요
         print("box_size_0_map : ", box_size_0_map)
         print("box_size_1_map : ", box_size_1_map)
         print("box_size_2_map : ", box_size_2_map)
@@ -164,6 +166,9 @@ class MetricHook(Hook):
 
         # -----------------------------------------
         # WandB 로깅 부분 추가
+
+        wandb.log({})
+
         wandb.log(
             {
                 "bbox_mAP": base_metric.compute()["map_50"],
@@ -174,9 +179,9 @@ class MetricHook(Hook):
 
         # 각 박스 사이즈 별 메트릭 로깅
         for idx, size_metric in enumerate(bbox_size_metrics):
-            size_mAP_key = f"box_size_{idx}_mAP"
+            size_mAP_key = f"box_size_{self.size_boundary[idx]}_mAP"
             size_mAP_value = size_metric.compute()["map_50"]
-            size_class_AP_key = f"box_size_{idx}_class_AP"
+            size_class_AP_key = f"box_size_{self.size_boundary[idx]}_class_AP"
             size_class_AP_value = sum(size_metric.compute()["map_50"]) / len(
                 size_metric.compute()["map_50"]
             )

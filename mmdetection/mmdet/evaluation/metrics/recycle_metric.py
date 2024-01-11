@@ -9,10 +9,15 @@ class RecycleMetric:
         self.class_num = 10
         # self.ap50_class_list = [[] for _ in range(self.class_num)]
 
-        self.bbox_size_class_num = 5
         # self.ap50_bbox_class_list = [[] for _ in range(self.bbox_class_num)]
         # self.epsil = np.spacing(1)
-        self.bbox_count_class_num = 5
+
+        # min, boundary ~~~ , max
+        self.bbox_size_boundary = [0, 64, 128, 256, 512, 1048577]
+        self.bbox_size_class_num = len(self.bbox_size_boundary) - 2
+
+        self.bbox_count_boundary = [0, 10, 20, 30, 50, 99]
+        self.bbox_count_class_num = len(self.bbox_count_boundary) - 2
 
         self.gt_dict = []
         self.predict_base_list = []
@@ -89,21 +94,13 @@ class RecycleMetric:
 
         for gt_bbox, gt_label in zip(gt_batch_bboxs, gt_batch_labels):
             gt_area = abs((gt_bbox[2] - gt_bbox[0]) * (gt_bbox[3] - gt_bbox[1]))
-            if gt_area <= 4096:
-                size_gt_batch_bboxs[0].append(gt_bbox)
-                size_gt_batch_labels[0].append(gt_label)
-            elif gt_area > 4096 and gt_area <= 16384:
-                size_gt_batch_bboxs[1].append(gt_bbox)
-                size_gt_batch_labels[1].append(gt_label)
-            elif gt_area > 16384 and gt_area <= 65536:
-                size_gt_batch_bboxs[2].append(gt_bbox)
-                size_gt_batch_labels[2].append(gt_label)
-            elif gt_area > 65536 and gt_area <= 262144:
-                size_gt_batch_bboxs[3].append(gt_bbox)
-                size_gt_batch_labels[3].append(gt_label)
-            elif gt_area > 262144:
-                size_gt_batch_bboxs[4].append(gt_bbox)
-                size_gt_batch_labels[4].append(gt_label)
+            for idx in range(self.bbox_size_class_num + 1):
+                if (
+                    gt_area > self.bbox_size_boundary[idx]
+                    and gt_area <= self.bbox_size_boundary[idx + 1]
+                ):
+                    size_gt_batch_bboxs[idx].append(gt_bbox)
+                    size_gt_batch_labels[idx].append(gt_label)
 
         pred_batch_dict = {
             "boxes": pred_batch_bboxs,
@@ -146,21 +143,13 @@ class RecycleMetric:
         image_bbox_count = len(outputs[0].gt_instances["labels"])
 
         for gt_bbox, gt_label in zip(gt_batch_bboxs, gt_batch_labels):
-            if image_bbox_count <= 10:
-                count_gt_batch_bboxs[0].append(gt_bbox)
-                count_gt_batch_labels[0].append(gt_label)
-            elif image_bbox_count > 10 and image_bbox_count <= 20:
-                count_gt_batch_bboxs[1].append(gt_bbox)
-                count_gt_batch_labels[1].append(gt_label)
-            elif image_bbox_count > 20 and image_bbox_count <= 30:
-                count_gt_batch_bboxs[2].append(gt_bbox)
-                count_gt_batch_labels[2].append(gt_label)
-            elif image_bbox_count > 30 and image_bbox_count <= 50:
-                count_gt_batch_bboxs[3].append(gt_bbox)
-                count_gt_batch_labels[3].append(gt_label)
-            elif image_bbox_count > 50:
-                count_gt_batch_bboxs[4].append(gt_bbox)
-                count_gt_batch_labels[4].append(gt_label)
+            for idx in range(self.bbox_count_class_num + 1):
+                if (
+                    image_bbox_count > self.bbox_count_boundary[idx]
+                    and image_bbox_count <= self.bbox_count_boundary[idx + 1]
+                ):
+                    count_gt_batch_bboxs[idx].append(gt_bbox)
+                    count_gt_batch_labels[idx].append(gt_label)
 
         pred_batch_dict = {
             "boxes": pred_batch_bboxs,
