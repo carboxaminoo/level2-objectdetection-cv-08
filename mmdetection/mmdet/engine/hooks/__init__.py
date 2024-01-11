@@ -10,11 +10,21 @@ from .utils import trigger_visualization_hook
 from .visualization_hook import DetVisualizationHook, TrackVisualizationHook
 from .yolox_mode_switch_hook import YOLOXModeSwitchHook
 from .submission_hook import SubmissionHook
+from .metric_hook import MetricHook
+from .wandb_logging_hook import WandbLoggingHook
 
 __all__ = [
-    'YOLOXModeSwitchHook', 'SyncNormHook', 'CheckInvalidLossHook',
-    'SetEpochInfoHook', 'MemoryProfilerHook', 'DetVisualizationHook',
-    'NumClassCheckHook', 'MeanTeacherHook', 'trigger_visualization_hook',
-    'PipelineSwitchHook', 'TrackVisualizationHook',
-    'SubmissionHook'
+    "YOLOXModeSwitchHook",
+    "SyncNormHook",
+    "CheckInvalidLossHook",
+    "SetEpochInfoHook",
+    "MemoryProfilerHook",
+    "DetVisualizationHook",
+    "NumClassCheckHook",
+    "MeanTeacherHook",
+    "trigger_visualization_hook",
+    "PipelineSwitchHook",
+    "TrackVisualizationHook",
+    "SubmissionHook",
+    "MetricHook",
 ]
