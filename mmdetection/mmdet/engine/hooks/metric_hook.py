@@ -167,41 +167,52 @@ class MetricHook(Hook):
         # -----------------------------------------
         # WandB 로깅 부분 추가
 
-        wandb.log({})
-
         wandb.log(
             {
-                "bbox_mAP": base_metric.compute()["map_50"],
-                "class_AP": sum(base_metric.compute()["map_50"])
-                / len(base_metric.compute()["map_50"]),
+                base_metric.compute(),
+                bbox_size_metrics[0].compute(),
+                bbox_size_metrics[1].compute(),
+                bbox_size_metrics[2].compute(),
+                bbox_count_metrics[0].compute(),
+                bbox_count_metrics[1].compute(),
+                bbox_count_metrics[2].compute(),
+                bbox_count_metrics[3].compute(),
             }
         )
 
-        # 각 박스 사이즈 별 메트릭 로깅
-        for idx, size_metric in enumerate(bbox_size_metrics):
-            size_mAP_key = f"box_size_{self.size_boundary[idx]}_mAP"
-            size_mAP_value = size_metric.compute()["map_50"]
-            size_class_AP_key = f"box_size_{self.size_boundary[idx]}_class_AP"
-            size_class_AP_value = sum(size_metric.compute()["map_50"]) / len(
-                size_metric.compute()["map_50"]
-            )
+        # wandb.log(
+        #     {
+        #         "bbox_mAP": base_metric.compute()["map_50"],
+        #         "class_AP": sum(base_metric.compute()["map_50"])
+        #         / len(base_metric.compute()["map_50"]),
+        #     }
+        # )
 
-            wandb.log(
-                {size_mAP_key: size_mAP_value, size_class_AP_key: size_class_AP_value}
-            )
+        # # 각 박스 사이즈 별 메트릭 로깅
+        # for idx, size_metric in enumerate(bbox_size_metrics):
+        #     size_mAP_key = f"box_size_{self.size_boundary[idx]}_mAP"
+        #     size_mAP_value = size_metric.compute()["map_50"]
+        #     size_class_AP_key = f"box_size_{self.size_boundary[idx]}_class_AP"
+        #     size_class_AP_value = sum(size_metric.compute()["map_50"]) / len(
+        #         size_metric.compute()["map_50"]
+        #     )
 
-        # 각 박스 카운트 별 메트릭 로깅
-        for idx, count_metric in enumerate(bbox_count_metrics):
-            count_mAP_key = f"box_count_{idx}_mAP"
-            count_mAP_value = count_metric.compute()["map_50"]
-            count_class_AP_key = f"box_count_{idx}_class_AP"
-            count_class_AP_value = sum(count_metric.compute()["map_50"]) / len(
-                count_metric.compute()["map_50"]
-            )
+        #     wandb.log(
+        #         {size_mAP_key: size_mAP_value, size_class_AP_key: size_class_AP_value}
+        #     )
 
-            wandb.log(
-                {
-                    count_mAP_key: count_mAP_value,
-                    count_class_AP_key: count_class_AP_value,
-                }
-            )
+        # # 각 박스 카운트 별 메트릭 로깅
+        # for idx, count_metric in enumerate(bbox_count_metrics):
+        #     count_mAP_key = f"box_count_{idx}_mAP"
+        #     count_mAP_value = count_metric.compute()["map_50"]
+        #     count_class_AP_key = f"box_count_{idx}_class_AP"
+        #     count_class_AP_value = sum(count_metric.compute()["map_50"]) / len(
+        #         count_metric.compute()["map_50"]
+        #     )
+
+        #     wandb.log(
+        #         {
+        #             count_mAP_key: count_mAP_value,
+        #             count_class_AP_key: count_class_AP_value,
+        #         }
+        #     )
