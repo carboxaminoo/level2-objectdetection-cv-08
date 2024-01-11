@@ -16,6 +16,53 @@ class MetricHook(Hook):
     def __init__(self) -> None:
         self.metric_class = RecycleMetric()
 
+    def after_train_iter(
+        self,
+        runner: Runner,
+        batch_idx: int,
+        data_batch: dict,
+        outputs: Optional[dict] = None,
+    ) -> None:
+        """
+        Train에서 나온 loss, loss_rpn_cls, loss_rpn_bbox, loss_cls, loss_bbox, acc를 iter마다 wandb에 logging
+
+        Args:
+            outputs:
+                loss
+                loss_rpn_cls
+                loss_rpn_bbox
+                loss_cls
+                loss_bbox
+                acc
+            pre_outs:
+                pred_instances:
+                    labels
+                    scores
+                    bboxes
+                gt_instances:
+                    labels
+                    bboxes
+            annotations(list[dict]): [img1_ann_dict, img2_ann_dict, …]
+                'bboxes': numpy array of shape (n, 4)
+                'labels': numpy array of shape (n, )
+            results(list[list]): [[cls1_det, cls2_det, …], …]
+                cls1_det: numpy array of shape (n, cls, 4)
+                cls2_det: numpy array of shape (n, cls, 4)
+                …
+
+        """
+
+        wandb.log(
+            {
+                "train_loss": outputs["loss"],
+                "train_loss_rpn_cls": outputs["loss_rpn_cls"],
+                "train_loss_rpn_bbox": outputs["loss_rpn_bbox"],
+                "train_loss_cls": outputs["loss_cls"],
+                "train_loss_bbox": outputs["loss_bbox"],
+                "train_acc": outputs["acc"],
+            }
+        )
+
     def after_val_iter(
         self,
         runner: Runner,
@@ -120,8 +167,8 @@ class MetricHook(Hook):
         wandb.log(
             {
                 "bbox_mAP": base_metric.compute()["map_50"],
-                "class_AP": sum(base_metric.compute()["ap"])
-                / len(base_metric.compute()["ap"]),
+                "class_AP": sum(base_metric.compute()["map_50"])
+                / len(base_metric.compute()["map_50"]),
             }
         )
 
@@ -130,8 +177,8 @@ class MetricHook(Hook):
             size_mAP_key = f"box_size_{idx}_mAP"
             size_mAP_value = size_metric.compute()["map_50"]
             size_class_AP_key = f"box_size_{idx}_class_AP"
-            size_class_AP_value = sum(size_metric.compute()["ap"]) / len(
-                size_metric.compute()["ap"]
+            size_class_AP_value = sum(size_metric.compute()["map_50"]) / len(
+                size_metric.compute()["map_50"]
             )
 
             wandb.log(
@@ -143,8 +190,8 @@ class MetricHook(Hook):
             count_mAP_key = f"box_count_{idx}_mAP"
             count_mAP_value = count_metric.compute()["map_50"]
             count_class_AP_key = f"box_count_{idx}_class_AP"
-            count_class_AP_value = sum(count_metric.compute()["ap"]) / len(
-                count_metric.compute()["ap"]
+            count_class_AP_value = sum(count_metric.compute()["map_50"]) / len(
+                count_metric.compute()["map_50"]
             )
 
             wandb.log(
