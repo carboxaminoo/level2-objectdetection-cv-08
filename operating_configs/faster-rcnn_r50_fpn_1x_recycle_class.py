@@ -56,7 +56,7 @@ train_dataloader = dict(
     dataset=dict(
         data_root=data_root,
         metainfo=metainfo,
-        ann_file="train.json",
+        ann_file="train_eye_eda.json",
         data_prefix=dict(img=""),
     ),
 )
@@ -65,7 +65,7 @@ val_dataloader = dict(
     dataset=dict(
         data_root=data_root,
         metainfo=metainfo,
-        ann_file="train.json",
+        ann_file="val_eye_eda.json",
         data_prefix=dict(img=""),
     ),
 )
@@ -81,7 +81,7 @@ test_dataloader = dict(
 
 
 # Modify metric related settings
-val_evaluator = dict(ann_file=data_root + "train.json", classwise=True)
+val_evaluator = dict(ann_file=data_root + "val_eye_eda.json", classwise=True)
 test_evaluator = dict(ann_file=data_root + "test.json")
 
 # We can use the pre-trained Mask RCNN model to obtain higher performance

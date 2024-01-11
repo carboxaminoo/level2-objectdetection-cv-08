@@ -19,6 +19,14 @@ class MetricHook(Hook):
         self.metric_class = RecycleMetric()
         self.count_boundary = self.metric_class.bbox_count_boundary[1:-1]
         self.size_boundary = self.metric_class.bbox_size_boundary[1:-1]
+        self.train_loss = {
+            "train_loss": [],
+            "train_loss_rpn_cls": [],
+            "train_loss_rpn_bbox": [],
+            "train_loss_cls": [],
+            "train_loss_bbox": [],
+            "train_acc": [],
+        }
 
     def after_train_iter(
         self,
@@ -55,17 +63,12 @@ class MetricHook(Hook):
                 …
 
         """
-
-        wandb.log(
-            {
-                "train_loss": outputs["loss"],
-                "train_loss_rpn_cls": outputs["loss_rpn_cls"],
-                "train_loss_rpn_bbox": outputs["loss_rpn_bbox"],
-                "train_loss_cls": outputs["loss_cls"],
-                "train_loss_bbox": outputs["loss_bbox"],
-                "train_acc": outputs["acc"],
-            }
-        )
+        self.train_loss["train_loss"].append(outputs["loss"])
+        self.train_loss["train_loss_rpn_cls"].append(outputs["loss_rpn_cls"])
+        self.train_loss["train_loss_rpn_bbox"].append(outputs["loss_rpn_bbox"])
+        self.train_loss["train_loss_cls"].append(outputs["loss_cls"])
+        self.train_loss["train_loss_bbox"].append(outputs["loss_bbox"])
+        self.train_loss["train_acc"].append(outputs["acc"])
 
     def after_val_iter(
         self,
@@ -111,12 +114,7 @@ class MetricHook(Hook):
                 bbox_mAP_m
                 bbox_mAP_l
         """
-        # class_aps = []
-        # class_bbox_aps = []
-        # for class_ap in self.metric_class.ap50_class_list:
-        #     class_aps.append(sum(class_ap) / len(class_ap))
-        # for bbox_class_ap in self.metric_class.ap50_bbox_class_list:
-        #     class_bbox_aps.append(sum(bbox_class_ap) / len(bbox_class_ap))
+
         base_metric = MeanAveragePrecision(iou_type="bbox", class_metrics=True)
         base_metric50 = MeanAveragePrecision(
             iou_type="bbox", class_metrics=True, iou_thresholds=[0.5]
@@ -148,42 +146,14 @@ class MetricHook(Hook):
             for gt_dict, pred_dict in bbox_count_dict:
                 bbox_count_metrics[idx].update([pred_dict], [gt_dict])
 
-        box_size_0_map = bbox_size_metrics[0].compute()["map_50"]
-        box_size_1_map = bbox_size_metrics[1].compute()["map_50"]
-        box_size_2_map = bbox_size_metrics[2].compute()["map_50"]
-
-        box_count_0_map = bbox_count_metrics[0].compute()["map_50"]
-        box_count_1_map = bbox_count_metrics[1].compute()["map_50"]
-        box_count_2_map = bbox_count_metrics[2].compute()["map_50"]
-        box_count_3_map = bbox_count_metrics[3].compute()["map_50"]
-
-        print(base_metric.compute())
-        print("Class AP : ", base_metric)  # check 필요
-        print("box_size_0_map : ", box_size_0_map)
-        print("box_size_1_map : ", box_size_1_map)
-        print("box_size_2_map : ", box_size_2_map)
-        print("box_count_0_map : ", box_count_0_map)
-        print("box_count_1_map : ", box_count_1_map)
-        print("box_count_2_map : ", box_count_2_map)
-        print("box_count_3_map : ", box_count_3_map)
-        # print("BBOX Class AP : ", bbox_metric)
-
         # -----------------------------------------
         # WandB 로깅 부분 추가
 
-        wandb.log(
-            {
-                base_metric.compute(),
-                bbox_size_metrics[0].compute(),
-                bbox_size_metrics[1].compute(),
-                bbox_size_metrics[2].compute(),
-                bbox_count_metrics[0].compute(),
-                bbox_count_metrics[1].compute(),
-                bbox_count_metrics[2].compute(),
-                bbox_count_metrics[3].compute(),
-            }
-        )
         score_dict = {}
+        # train Scores
+        for key, value in self.train_loss.items():
+            score_dict[key] = sum(value) / len(value)
+
         labels = [
             "General trash",
             "Paper",
@@ -281,6 +251,25 @@ class MetricHook(Hook):
                     score_dict[name + f"_{label}_mAR100"] = -1
 
         wandb.log(score_dict)
+
+        print("box_size_0_map : ", bbox_size_metric_scores[0]["map_50"])
+        print("box_size_1_map : ", bbox_size_metric_scores[1]["map_50"])
+        print("box_size_2_map : ", bbox_size_metric_scores[2]["map_50"])
+        print("box_count_0_map : ", bbox_count_metric_scores[0]["map_50"])
+        print("box_count_1_map : ", bbox_count_metric_scores[1]["map_50"])
+        print("box_count_2_map : ", bbox_count_metric_scores[2]["map_50"])
+        print("box_count_3_map : ", bbox_count_metric_scores[3]["map_50"])
+
+        # clear
+        self.train_loss = {
+            "train_loss": [],
+            "train_loss_rpn_cls": [],
+            "train_loss_rpn_bbox": [],
+            "train_loss_cls": [],
+            "train_loss_bbox": [],
+            "train_acc": [],
+        }
+        self.metric_class.clear_init()
 
         # wandb.log(
         #     {
