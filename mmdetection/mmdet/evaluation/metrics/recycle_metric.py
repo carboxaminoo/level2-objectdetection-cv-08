@@ -9,10 +9,10 @@ class RecycleMetric:
         self.class_num = 10
         # self.ap50_class_list = [[] for _ in range(self.class_num)]
 
-        self.bbox_size_class_num = 3
+        self.bbox_size_class_num = 5
         # self.ap50_bbox_class_list = [[] for _ in range(self.bbox_class_num)]
         # self.epsil = np.spacing(1)
-        self.bbox_count_class_num = 4
+        self.bbox_count_class_num = 5
 
         self.gt_dict = []
         self.predict_base_list = []
@@ -92,12 +92,18 @@ class RecycleMetric:
             if gt_area <= 4096:
                 size_gt_batch_bboxs[0].append(gt_bbox)
                 size_gt_batch_labels[0].append(gt_label)
-            elif gt_area > 4096 and gt_area <= 262144:
+            elif gt_area > 4096 and gt_area <= 16384:
                 size_gt_batch_bboxs[1].append(gt_bbox)
                 size_gt_batch_labels[1].append(gt_label)
-            elif gt_area > 262144:
+            elif gt_area > 16384 and gt_area <= 65536:
                 size_gt_batch_bboxs[2].append(gt_bbox)
                 size_gt_batch_labels[2].append(gt_label)
+            elif gt_area > 65536 and gt_area <= 262144:
+                size_gt_batch_bboxs[3].append(gt_bbox)
+                size_gt_batch_labels[3].append(gt_label)
+            elif gt_area > 262144:
+                size_gt_batch_bboxs[4].append(gt_bbox)
+                size_gt_batch_labels[4].append(gt_label)
 
         pred_batch_dict = {
             "boxes": pred_batch_bboxs,
@@ -139,7 +145,6 @@ class RecycleMetric:
 
         image_bbox_count = len(outputs[0].gt_instances["labels"])
 
-        gt_batch_bbox_counts = []
         for gt_bbox, gt_label in zip(gt_batch_bboxs, gt_batch_labels):
             if image_bbox_count <= 10:
                 count_gt_batch_bboxs[0].append(gt_bbox)
@@ -150,9 +155,12 @@ class RecycleMetric:
             elif image_bbox_count > 20 and image_bbox_count <= 30:
                 count_gt_batch_bboxs[2].append(gt_bbox)
                 count_gt_batch_labels[2].append(gt_label)
-            elif image_bbox_count > 30:
+            elif image_bbox_count > 30 and image_bbox_count <= 50:
                 count_gt_batch_bboxs[3].append(gt_bbox)
                 count_gt_batch_labels[3].append(gt_label)
+            elif image_bbox_count > 50:
+                count_gt_batch_bboxs[4].append(gt_bbox)
+                count_gt_batch_labels[4].append(gt_label)
 
         pred_batch_dict = {
             "boxes": pred_batch_bboxs,
