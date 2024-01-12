@@ -2,12 +2,14 @@
 import os.path as osp
 import warnings
 from typing import Dict, Optional, Sequence
+import mmcv
 import numpy as np
 import wandb
 
 from mmengine.hooks import Hook
 from mmengine.runner import Runner
 from mmengine.utils import mkdir_or_exist
+from mmengine.fileio import get
 
 # from mmengine.visualization import Visualizer
 
@@ -43,7 +45,7 @@ class WandbVizHook(Hook):
         }
         self.box_visualizer = BboxViz()
         self.data_root = "data/recycle/"
-        self.visualization_dict = []
+        self.visualization_dict = dict()
 
     def after_val_iter(
         self,
@@ -65,6 +67,8 @@ class WandbVizHook(Hook):
         """
         # runner.cfg.wandb
         image_path = self.data_root + outputs[0].img_path[-14:]
+        img_bytes = get(image_path, backend_args=None)
+        img = mmcv.imfrombytes(img_bytes, channel_order='rgb')
         pred_data = []
         gt_data = []
         pred_data.append(
@@ -78,51 +82,35 @@ class WandbVizHook(Hook):
             )
         )
 
-        # for output in outputs:
-        #     box_data = []
-        #     gt_data = []
-        #     image = self.data_root + output.img_path[-14:]
-        #     for label, score, bbox in zip(output.pred_instances.labels, output.pred_instances.scores, output.pred_instances.bboxes):
-        #         bbox = bbox.cpu().numpy()
-        #         position = {"minX": bbox[0], "maxX": bbox[2], "minY": bbox[1], "maxY": bbox[3]}
-        #         class_id = int(label.cpu())
-        #         box_caption = self.class_labels[class_id]
-        #         scores = {"acc": float(score.cpu())}
-        #         box_data.append({"position": position, "class_id": class_id, "box_caption": box_caption, "scores": scores})
-        #     for label, score, bbox in zip(output.gt_instances.labels, output.gt_instances.bboxes):
-        #         bbox = bbox.cpu().numpy()
-        #         position = {"minX": bbox[0], "maxX": bbox[2], "minY": bbox[1], "maxY": bbox[3]}
-        #         class_id = int(label.cpu())
-        #         box_caption = self.class_labels[class_id]
-        #         gt_data.append({"position": position, "class_id": class_id, "box_caption": box_caption})
-
         pred_img = wandb.Image(
-            image_path,
+            img,
             boxes={
                 "predictions": {
                     "box_data": [data for data in pred_data[0]],
                     "class_labels": self.class_labels,
                 },
+                "ground_truth": {
+                    "box_data": [data for data in gt_data[0]],
+                    "class_labels": self.class_labels,
+                },
             },
         )
-        gt_img = wandb.Image(
-            image_path,
-            boxes={
-                "ground_truth": {"box_data": gt_data},
-                "class_labels": self.class_labels,
-            },
-        )
-        self.visualization_dict.append(
-            {
-                f"{outputs[0].img_path[-14:]}_gt": gt_img,
-                f"{outputs[0].img_path[-14:]}_pred": pred_img,
-            }
-        )
+        # gt_img = wandb.Image(
+        #     image_path,
+        #     boxes={
+        #         "ground_truth": {"box_data": gt_data},
+        #         "class_labels": self.class_labels,
+        #     },
+        # )
+        table = wandb.Table(columns=["image"])
+        table.add_data(pred_img)
+        self.visualization_dict[f"{outputs[0].img_path[-14:]}_pred"] = table
+        
 
     def after_val_epoch(self, runner, metrics: Dict[str, float] | None = None) -> None:
         wandb.log(self.visualization_dict)
 
-        self.visualization_dict = []
+        self.visualization_dict = dict()
 
     def after_test(self, runner: Runner):
         pass
