@@ -4,23 +4,20 @@ _base_ = ''
 # We also need to change the num_classes in head to match the dataset's annotation
 model = dict(
     data_preprocessor=dict(
-        mean=[123.65, 117.40, 110.07], #[110.07439219763648, 117.39781330560969, 123.65060982361402]
-        std=[54.01, 53.36, 54.77],) # [54.771741507118314, 53.35981738887164, 54.011416460436045]
+        mean=[123.65, 117.40, 110.07],
+        std=[54.01, 53.36, 54.77],),
 )
 
-vis_backends = [
-    dict(type='LocalVisBackend'),
-]
+vis_backends = [dict(type='LocalVisBackend')]
 visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=vis_backends,
-    name='visualizer',
-    interval=5)
-default_hooks = dict(visualization=dict(type="DetVisualizationHook",draw=True))
+    name='visualizer')
+default_hooks = dict(visualization=dict(type="DetVisualizationHook",draw=True, interval=5))
 
 custom_hooks = [
     dict(type='SubmissionHook'),
-    dict(type='MetricHook')
+    dict(type='MetricHook'),
 ]
 
 # Modify dataset related settings
