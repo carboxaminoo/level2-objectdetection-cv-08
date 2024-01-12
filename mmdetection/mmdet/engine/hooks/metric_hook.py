@@ -260,10 +260,11 @@ class MetricHook(Hook):
             os.path.join(image_folder_path, image_path)
             for image_path in os.listdir(image_folder_path)
         ]
-        image_path_list = sorted(image_path_list)
+        image_path_list = sorted(image_path_list)[::20]
         image_list = [
             wandb.Image(
-                Image.open(path), caption=f"{path.split('/')[-1].split('.')[0]}"
+                Image.open(path).resize((1024, 512)),
+                caption=f"{path.split('/')[-1].split('.')[0]}",
             )
             for path in image_path_list
         ]
