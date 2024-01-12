@@ -10,7 +10,9 @@ from torchmetrics.detection import MeanAveragePrecision
 
 import torch
 import wandb
+import os
 from tqdm import tqdm
+from PIL import Image
 
 
 @HOOKS.register_module()
@@ -250,6 +252,28 @@ class MetricHook(Hook):
                     score_dict[name + f"_{label}_mAP50"] = -1
                     score_dict[name + f"_{label}_mAR100"] = -1
 
+        # image logging
+        image_folder_path = os.path.join(
+            runner.work_dir,
+            "_".join(runner._experiment_name.split("_")[-2:]),
+            "vis_data",
+            "vis_image",
+        )
+        image_path_list = [
+            os.path.join(image_folder_path, image_path)
+            for image_path in os.listdir(image_folder_path)
+        ]
+        image_path_list = sorted(image_path_list)
+        image_list = [
+            wandb.Image(
+                Image.open(path), caption=f"{path.split('/')[-1].split('.')[0]}"
+            )
+            for path in image_path_list
+        ]
+
+        score_dict["visual_inference_image"] = image_list
+
+        # wandb log
         wandb.log(score_dict)
 
         print("box_size_0_map : ", bbox_size_metric_scores[0]["map_50"])
