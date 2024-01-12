@@ -353,7 +353,8 @@ mmdetection/docs/modelzoo_statistics.md
 mmdetection/mmdet/.mim
 mmdetection/.vscode/*
 mmdetection/.vscode
-operating_config
+operating_configs/*
+!operating_configs/base_config.py
 work_dirs
 data/*
 data
