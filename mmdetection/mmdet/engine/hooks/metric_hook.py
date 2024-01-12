@@ -23,11 +23,8 @@ class MetricHook(Hook):
         self.size_boundary = self.metric_class.bbox_size_boundary[1:-1]
         self.train_loss = {
             "train_loss": [],
-            "train_loss_rpn_cls": [],
-            "train_loss_rpn_bbox": [],
             "train_loss_cls": [],
             "train_loss_bbox": [],
-            "train_acc": [],
         }
 
     def after_train_iter(
@@ -66,11 +63,8 @@ class MetricHook(Hook):
 
         """
         self.train_loss["train_loss"].append(outputs["loss"])
-        self.train_loss["train_loss_rpn_cls"].append(outputs["loss_rpn_cls"])
-        self.train_loss["train_loss_rpn_bbox"].append(outputs["loss_rpn_bbox"])
         self.train_loss["train_loss_cls"].append(outputs["loss_cls"])
         self.train_loss["train_loss_bbox"].append(outputs["loss_bbox"])
-        self.train_loss["train_acc"].append(outputs["acc"])
 
     def after_val_iter(
         self,
@@ -154,7 +148,10 @@ class MetricHook(Hook):
         score_dict = {}
         # train Scores
         for key, value in self.train_loss.items():
-            score_dict[key] = sum(value) / len(value)
+            try:
+                score_dict[key] = sum(value) / len(value)
+            except:
+                score_dict[key] = 0
 
         labels = [
             "General trash",
@@ -287,11 +284,8 @@ class MetricHook(Hook):
         # clear
         self.train_loss = {
             "train_loss": [],
-            "train_loss_rpn_cls": [],
-            "train_loss_rpn_bbox": [],
             "train_loss_cls": [],
             "train_loss_bbox": [],
-            "train_acc": [],
         }
         self.metric_class.clear_init()
 
