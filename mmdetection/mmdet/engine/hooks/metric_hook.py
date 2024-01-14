@@ -260,7 +260,7 @@ class MetricHook(Hook):
             os.path.join(image_folder_path, image_path)
             for image_path in os.listdir(image_folder_path)
         ]
-        image_path_list = sorted(image_path_list)[::20]
+        # image_path_list = sorted(image_path_list)[::20]
         image_list = [
             wandb.Image(
                 Image.open(path).resize((1024, 512)),

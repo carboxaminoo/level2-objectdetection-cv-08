@@ -14,7 +14,7 @@ visualizer = dict(
     type="DetLocalVisualizer", vis_backends=vis_backends, name="visualizer"
 )
 default_hooks = dict(
-    visualization=dict(type="DetVisualizationHook", draw=True, interval=1)
+    visualization=dict(type="DetVisualizationHook", draw=True, interval=20)
 )
 
 custom_hooks = [
