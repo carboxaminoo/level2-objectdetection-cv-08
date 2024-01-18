@@ -18,7 +18,10 @@ default_hooks = dict(
 )
 
 custom_hooks = [
-    dict(type="SubmissionHook"),
+    # test_out_dir : 저장할 폴더 이름
+    # mode : val일 경우 train, test일 경우 test
+    # out_file : 저장할 csv파일 이름
+    dict(type="SubmissionHook", test_out_dir="submit", mode="test", out_file="submission"),
     dict(type="MetricHook"),
 ]
 
